@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye
+    restart: unless-stopped
+    volumes:
+      - ..:/workspace:cached
+    command: sleep infinity
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_NAME: nextgen_db
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/nextgen_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    network_mode: service:postgres
