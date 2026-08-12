@@ -1,4 +1,5 @@
 # 🚀 Next-Gen Data Starter
+
 ### Production-Ready NestJS Backend with Drizzle ORM, PostgreSQL, Redis, BullMQ & CI/CD
 
 <div align="center">
@@ -16,6 +17,10 @@
 
 <p align="center">
   A state-of-the-art, developer-first Node.js backend starter designed to eliminate boilerplate, optimize query performance with <b>Drizzle ORM</b>, accelerate response times with <b>Redis</b>, manage async tasks with <b>BullMQ</b>, and automate delivery with <b>GitHub Actions</b>.
+</p>
+
+<p align="center">
+  <b>Maintained with ❤️ by <a href="https://macromodule.com">Macromodule</a></b>
 </p>
 
 [Quickstart](#-30-second-quickstart) • [Architecture](#-architecture--data-flow) • [Docker Guide](#-docker-local-infrastructure) • [Drizzle Workflow](#️-working-with-drizzle-orm) • [Add a Module Guide](#-step-by-step-how-to-add-a-new-domain-module) • [API Documentation](#-interactive-swagger-documentation)
@@ -77,45 +82,51 @@
 
 ## 📊 Drizzle ORM vs. Prisma: Why We Swapped
 
-| Metric / Feature | Traditional ORMs (Prisma / TypeORM) | Drizzle ORM (This Starter) |
-| :--- | :--- | :--- |
-| **Engine Architecture** | Heavy Rust binary query engine (~40MB+) | Zero binary dependencies (Pure TypeScript) |
-| **Serverless Cold Starts**| Slow (1,500ms - 4,000ms engine boot) | Instant (< 50ms native SQL execution) |
-| **Type Inference** | Generated client from custom DSL schema | Native TypeScript types directly inferred |
-| **Memory Footprint** | High memory allocation per process | Minimal memory overhead |
-| **Query Control** | Abstracted queries with N+1 gotchas | Direct SQL builder with complete relational query control |
-| **Migration Tooling** | Heavy CLI runtime | Lightweight `drizzle-kit` CLI with visual Studio GUI |
+| Metric / Feature           | Traditional ORMs (Prisma / TypeORM)     | Drizzle ORM (This Starter)                                |
+| :------------------------- | :-------------------------------------- | :-------------------------------------------------------- |
+| **Engine Architecture**    | Heavy Rust binary query engine (~40MB+) | Zero binary dependencies (Pure TypeScript)                |
+| **Serverless Cold Starts** | Slow (1,500ms - 4,000ms engine boot)    | Instant (< 50ms native SQL execution)                     |
+| **Type Inference**         | Generated client from custom DSL schema | Native TypeScript types directly inferred                 |
+| **Memory Footprint**       | High memory allocation per process      | Minimal memory overhead                                   |
+| **Query Control**          | Abstracted queries with N+1 gotchas     | Direct SQL builder with complete relational query control |
+| **Migration Tooling**      | Heavy CLI runtime                       | Lightweight `drizzle-kit` CLI with visual Studio GUI      |
 
 ---
 
 ## ⚡ 30-Second Quickstart
 
 ### Prerequisites
+
 - **Node.js**: v20.x or higher
 - **Docker & Docker Compose**: Installed and running (required for PostgreSQL & Redis)
 
 ### Step 1: Clone the Repository
+
 ```bash
 git clone https://github.com/your-username/next-gen-data-starter.git
 cd next-gen-data-starter
 ```
 
 ### Step 2: Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### Step 3: Configure Environment
+
 ```bash
 cp .env.example .env
 ```
 
 ### Step 4: Boot Local PostgreSQL 16 & Redis 7
+
 ```bash
 npm run docker:up
 ```
 
 ### Step 5: Run Migrations & Seed Sample Data
+
 ```bash
 npm run db:generate
 npm run db:migrate
@@ -123,11 +134,13 @@ npm run db:seed
 ```
 
 ### Step 6: Start Development Server
+
 ```bash
 npm run start:dev
 ```
 
 ### 🎯 Instant Verification Links:
+
 - 🌐 **API Base Endpoint**: [http://localhost:3000/api/v1](http://localhost:3000/api/v1)
 - 📚 **Swagger Documentation**: [http://localhost:3000/docs](http://localhost:3000/docs)
 - 💚 **Infrastructure Health Status**: [http://localhost:3000/api/v1/health](http://localhost:3000/api/v1/health)
@@ -145,12 +158,13 @@ This starter uses **Docker Compose** to provision a fully isolated, production-e
 
 The `docker-compose.yml` at the project root defines two services:
 
-| Service | Image | Container Name | Port | Purpose |
-| :--- | :--- | :--- | :--- | :--- |
+| Service      | Image                | Container Name     | Port   | Purpose                                   |
+| :----------- | :------------------- | :----------------- | :----- | :---------------------------------------- |
 | **postgres** | `postgres:16-alpine` | `nextgen-postgres` | `5432` | Primary database for all application data |
-| **redis** | `redis:7-alpine` | `nextgen-redis` | `6379` | Caching layer + BullMQ job queue backend |
+| **redis**    | `redis:7-alpine`     | `nextgen-redis`    | `6379` | Caching layer + BullMQ job queue backend  |
 
 Both services:
+
 - Restart automatically (`unless-stopped`) if Docker restarts.
 - Use named **persistent volumes** (`pgdata`, `redisdata`) to survive container restarts without data loss.
 - Have built-in **health checks** that ensure they are fully ready before the app connects.
@@ -163,11 +177,11 @@ services:
     image: postgres:16-alpine
     container_name: nextgen-postgres
     ports:
-      - "${DATABASE_PORT:-5432}:5432"
+      - '${DATABASE_PORT:-5432}:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 5s
       retries: 5
 
@@ -175,11 +189,11 @@ services:
     image: redis:7-alpine
     container_name: nextgen-redis
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - '${REDIS_PORT:-6379}:6379'
     volumes:
       - redisdata:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
       retries: 5
 ```
@@ -188,16 +202,17 @@ services:
 
 ### Common Docker Commands
 
-| Command | Description |
-| :--- | :--- |
-| `npm run docker:up` | Start PostgreSQL & Redis in the background (detached mode) |
-| `npm run docker:down` | Stop and remove containers (data is preserved in volumes) |
-| `npm run docker:logs` | Stream real-time logs from both containers |
-| `docker ps` | View all running containers and their status |
-| `docker exec -it nextgen-postgres psql -U postgres -d nextgen_db` | Open a PostgreSQL interactive shell |
-| `docker exec -it nextgen-redis redis-cli` | Open a Redis interactive CLI |
+| Command                                                           | Description                                                |
+| :---------------------------------------------------------------- | :--------------------------------------------------------- |
+| `npm run docker:up`                                               | Start PostgreSQL & Redis in the background (detached mode) |
+| `npm run docker:down`                                             | Stop and remove containers (data is preserved in volumes)  |
+| `npm run docker:logs`                                             | Stream real-time logs from both containers                 |
+| `docker ps`                                                       | View all running containers and their status               |
+| `docker exec -it nextgen-postgres psql -U postgres -d nextgen_db` | Open a PostgreSQL interactive shell                        |
+| `docker exec -it nextgen-redis redis-cli`                         | Open a Redis interactive CLI                               |
 
 **Full lifecycle example:**
+
 ```bash
 # Boot up infrastructure
 npm run docker:up
@@ -240,26 +255,28 @@ To change the PostgreSQL port to `5433` (e.g., to avoid conflicts with a local i
 To run the **entire stack** (NestJS app + PostgreSQL + Redis) inside Docker for production-like testing:
 
 **Step 1: Add an `app` service to `docker-compose.yml`:**
+
 ```yaml
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: nextgen-app
-    ports:
-      - "3000:3000"
-    env_file: .env
-    environment:
-      DATABASE_HOST: postgres
-      REDIS_HOST: redis
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+app:
+  build:
+    context: .
+    dockerfile: Dockerfile
+  container_name: nextgen-app
+  ports:
+    - '3000:3000'
+  env_file: .env
+  environment:
+    DATABASE_HOST: postgres
+    REDIS_HOST: redis
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
 ```
 
 **Step 2: Create a production `Dockerfile`:**
+
 ```dockerfile
 # ---- Build Stage ----
 FROM node:20-alpine AS builder
@@ -281,6 +298,7 @@ CMD ["node", "dist/main"]
 ```
 
 **Step 3: Build and run the full stack:**
+
 ```bash
 docker compose up --build
 ```
@@ -406,16 +424,19 @@ next-gen-data/
 ## 🌱 Database Seeding (Faker.js)
 
 Populate your database with realistic mock data in 2 seconds:
+
 ```bash
 npm run db:seed
 ```
 
 This runs [src/database/seed.ts](src/database/seed.ts) to generate:
+
 - 20 realistic user accounts with bios, emails (unique-guarded), and active flags.
 - 40 relational blog posts linked via foreign keys to authors.
 - All data is cleared and re-seeded on each run for a clean slate.
 
 Inspect the seeded data visually in your browser with **Drizzle Studio**:
+
 ```bash
 npm run db:studio
 ```
@@ -425,6 +446,7 @@ npm run db:studio
 ## 🛠️ Working with Drizzle ORM
 
 ### 1. Defining Tables & Relations
+
 Create schema files inside `src/database/schema/`:
 
 ```typescript
@@ -451,6 +473,7 @@ export type NewProduct = typeof products.$inferInsert;
 ```
 
 Export your new table from `src/database/schema/index.ts`:
+
 ```typescript
 export * from './users.schema';
 export * from './posts.schema';
@@ -458,22 +481,29 @@ export * from './products.schema'; // Add your schema export
 ```
 
 ### 2. Generating Migrations
+
 Drizzle Kit detects schema changes and generates optimized SQL migration files:
+
 ```bash
 npm run db:generate
 ```
 
 ### 3. Running Migrations
+
 Apply all pending migrations to PostgreSQL:
+
 ```bash
 npm run db:migrate
 ```
 
 ### 4. Visualizing with Drizzle Studio
+
 Launch the visual database manager:
+
 ```bash
 npm run db:studio
 ```
+
 Navigate to [https://local.drizzle.studio](https://local.drizzle.studio) to view, search, and edit records.
 
 ---
@@ -483,11 +513,13 @@ Navigate to [https://local.drizzle.studio](https://local.drizzle.studio) to view
 Standardized pagination is built into [src/common/dto/pagination.dto.ts](src/common/dto/pagination.dto.ts).
 
 ### Example Query Request:
+
 ```http
 GET /api/v1/users?page=1&limit=10&sortBy=createdAt&sortOrder=desc&search=Alice
 ```
 
 ### Standardized Paginated JSON Response:
+
 ```json
 {
   "statusCode": 200,
@@ -541,7 +573,9 @@ update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
 ```
 
 ### Programmatic Cache Operations
+
 Inject `RedisService` anywhere in your application:
+
 ```typescript
 // Store data with custom TTL (in seconds)
 await this.redisService.set('custom_key', data, 60);
@@ -560,6 +594,7 @@ await this.redisService.invalidatePattern('users:*');
 Manage long-running tasks in background worker queues powered by Redis.
 
 ### 1. Enqueue a Job (Producer):
+
 ```typescript
 @Injectable()
 export class UsersService {
@@ -567,7 +602,7 @@ export class UsersService {
 
   async create(dto: CreateUserDto) {
     const newUser = await this.db.insert(users).values(dto).returning();
-    
+
     // Non-blocking async job dispatch
     await this.emailQueue.queueWelcomeEmail({
       userId: newUser.id,
@@ -581,6 +616,7 @@ export class UsersService {
 ```
 
 ### 2. Process the Job (Consumer Worker):
+
 ```typescript
 @Processor('email_queue')
 export class EmailProcessor extends WorkerHost implements OnModuleDestroy {
@@ -617,7 +653,9 @@ export class EmailProcessor extends WorkerHost implements OnModuleDestroy {
 Follow this 5-step blueprint to create a new domain module (e.g. `Articles`):
 
 ### Step 1: Define Drizzle Schema
+
 Create `src/database/schema/articles.schema.ts` and re-export in `src/database/schema/index.ts`:
+
 ```typescript
 import { pgTable, uuid, varchar, text, timestamp } from 'drizzle-orm/pg-core';
 
@@ -633,13 +671,16 @@ export type NewArticle = typeof articles.$inferInsert;
 ```
 
 Generate and run the migration:
+
 ```bash
 npm run db:generate
 npm run db:migrate
 ```
 
 ### Step 2: Create DTOs
+
 Create `src/modules/articles/dto/create-article.dto.ts`:
+
 ```typescript
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, MinLength } from 'class-validator';
@@ -659,7 +700,9 @@ export class CreateArticleDto {
 ```
 
 ### Step 3: Create Service
+
 Create `src/modules/articles/articles.service.ts`:
+
 ```typescript
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
@@ -691,7 +734,9 @@ export class ArticlesService {
 ```
 
 ### Step 4: Create Controller
+
 Create `src/modules/articles/articles.controller.ts`:
+
 ```typescript
 import { Controller, Get, Post, Body, Param, ParseUUIDPipe } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
@@ -729,7 +774,9 @@ export class ArticlesController {
 ```
 
 ### Step 5: Register Module in AppModule
+
 Create `src/modules/articles/articles.module.ts`:
+
 ```typescript
 import { Module } from '@nestjs/common';
 import { ArticlesController } from './articles.controller';
@@ -744,6 +791,7 @@ export class ArticlesModule {}
 ```
 
 Import `ArticlesModule` in `src/app.module.ts`:
+
 ```typescript
 @Module({
   imports: [
@@ -759,6 +807,7 @@ export class AppModule {}
 ## 📖 Interactive Swagger Documentation
 
 OpenAPI 3.0 documentation is auto-generated and available at:
+
 ```
 http://localhost:3000/docs
 ```
@@ -766,6 +815,7 @@ http://localhost:3000/docs
 > **💡 Note**: Swagger is **disabled by default in production** (when `NODE_ENV=production`). Set `SWAGGER_ENABLED=true` in your `.env` to enable it in development.
 
 Features included:
+
 - Full OpenAPI 3.0 interactive UI playground.
 - Real-time schema validation models with example payloads.
 - Bearer token authentication support.
@@ -775,7 +825,9 @@ Features included:
 ## 🚀 CI/CD & Migration Deployment Pipeline
 
 ### 1. Continuous Integration (`.github/workflows/ci.yml`)
+
 Runs automatically on every Pull Request or Push to `main`:
+
 - Boots up ephemeral PostgreSQL & Redis containers in GitHub Actions.
 - Runs Prettier and ESLint code quality checks.
 - Validates Drizzle schema integrity (`drizzle-kit generate`).
@@ -783,10 +835,12 @@ Runs automatically on every Pull Request or Push to `main`:
 - Verifies TypeScript production compilation (`nest build`).
 
 ### 2. Database Migration Pipeline (`.github/workflows/db-migrate.yml`)
+
 - Triggers on merges to `main` touching `schema/**` or `migrations/**`.
 - Supports manual deployment (`workflow_dispatch`) with environment selection (`staging` or `production`).
 
 ### 3. Dependency Security (`.github/dependabot.yml`)
+
 - **Weekly**: Scans npm dependencies for updates and opens automated PRs.
 - **Monthly**: Scans GitHub Actions versions for updates.
 
@@ -796,13 +850,13 @@ Runs automatically on every Pull Request or Push to `main`:
 
 The project ships with **26 behavioral unit tests** across 5 test suites covering every critical path:
 
-| Test File | What It Covers |
-| :--- | :--- |
-| `users.service.spec.ts` | Full CRUD lifecycle: create (conflict, success, email dispatch), findAll (cache HIT/MISS), findOne (not found), update (email conflict, cache invalidation), remove |
-| `cache.interceptor.spec.ts` | `@Cacheable` cache HIT (bypasses handler), cache MISS (stores result); `@InvalidateCache` pattern purge |
-| `http-exception.filter.spec.ts` | 400 validation error arrays, 404 not found, 500 uncaught exceptions |
-| `health.controller.spec.ts` | `200 OK` healthy state, `503` on DB failure, `503` on Redis failure |
-| `redis.service.spec.ts` | JSON get/set serialization, key deletion, wildcard pattern invalidation, ping health |
+| Test File                       | What It Covers                                                                                                                                                      |
+| :------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `users.service.spec.ts`         | Full CRUD lifecycle: create (conflict, success, email dispatch), findAll (cache HIT/MISS), findOne (not found), update (email conflict, cache invalidation), remove |
+| `cache.interceptor.spec.ts`     | `@Cacheable` cache HIT (bypasses handler), cache MISS (stores result); `@InvalidateCache` pattern purge                                                             |
+| `http-exception.filter.spec.ts` | 400 validation error arrays, 404 not found, 500 uncaught exceptions                                                                                                 |
+| `health.controller.spec.ts`     | `200 OK` healthy state, `503` on DB failure, `503` on Redis failure                                                                                                 |
+| `redis.service.spec.ts`         | JSON get/set serialization, key deletion, wildcard pattern invalidation, ping health                                                                                |
 
 ```bash
 # Run unit tests
@@ -822,50 +876,50 @@ npm run test:e2e
 
 ## ⚙️ Environment Variables Reference
 
-| Variable | Default Value | Description |
-| :--- | :--- | :--- |
-| `NODE_ENV` | `development` | Environment mode (`development`, `production`, `test`) |
-| `PORT` | `3000` | HTTP application port |
-| `API_PREFIX` | `api/v1` | Global API route prefix |
-| `ALLOWED_ORIGINS` | `*` | Comma-separated CORS allowed origins. Use `*` for dev, specific domains for prod |
-| `DATABASE_URL` | *(auto-built from parts)* | PostgreSQL connection URI (overrides individual parts if set) |
-| `DATABASE_HOST` | `localhost` | PostgreSQL host |
-| `DATABASE_PORT` | `5432` | PostgreSQL port |
-| `DATABASE_USER` | `postgres` | PostgreSQL username |
-| `DATABASE_PASSWORD` | `postgres` | PostgreSQL password |
-| `DATABASE_NAME` | `nextgen_db` | PostgreSQL database name |
-| `DATABASE_MAX_CONNECTIONS`| `20` | PostgreSQL connection pool size |
-| `REDIS_HOST` | `localhost` | Redis host (`redis` when running in Docker) |
-| `REDIS_PORT` | `6379` | Redis port |
-| `REDIS_PASSWORD` | *(empty)* | Redis authentication password |
-| `REDIS_TTL` | `60` | Default cache TTL in seconds |
-| `THROTTLE_TTL` | `60000` | Rate limiter window in milliseconds |
-| `THROTTLE_LIMIT` | `100` | Max requests permitted per window |
-| `SWAGGER_ENABLED` | `false` | Enable OpenAPI Swagger UI. **Always `false` in production.** |
-| `SWAGGER_PATH` | `docs` | Swagger endpoint path |
+| Variable                   | Default Value             | Description                                                                      |
+| :------------------------- | :------------------------ | :------------------------------------------------------------------------------- |
+| `NODE_ENV`                 | `development`             | Environment mode (`development`, `production`, `test`)                           |
+| `PORT`                     | `3000`                    | HTTP application port                                                            |
+| `API_PREFIX`               | `api/v1`                  | Global API route prefix                                                          |
+| `ALLOWED_ORIGINS`          | `*`                       | Comma-separated CORS allowed origins. Use `*` for dev, specific domains for prod |
+| `DATABASE_URL`             | _(auto-built from parts)_ | PostgreSQL connection URI (overrides individual parts if set)                    |
+| `DATABASE_HOST`            | `localhost`               | PostgreSQL host                                                                  |
+| `DATABASE_PORT`            | `5432`                    | PostgreSQL port                                                                  |
+| `DATABASE_USER`            | `postgres`                | PostgreSQL username                                                              |
+| `DATABASE_PASSWORD`        | `postgres`                | PostgreSQL password                                                              |
+| `DATABASE_NAME`            | `nextgen_db`              | PostgreSQL database name                                                         |
+| `DATABASE_MAX_CONNECTIONS` | `20`                      | PostgreSQL connection pool size                                                  |
+| `REDIS_HOST`               | `localhost`               | Redis host (`redis` when running in Docker)                                      |
+| `REDIS_PORT`               | `6379`                    | Redis port                                                                       |
+| `REDIS_PASSWORD`           | _(empty)_                 | Redis authentication password                                                    |
+| `REDIS_TTL`                | `60`                      | Default cache TTL in seconds                                                     |
+| `THROTTLE_TTL`             | `60000`                   | Rate limiter window in milliseconds                                              |
+| `THROTTLE_LIMIT`           | `100`                     | Max requests permitted per window                                                |
+| `SWAGGER_ENABLED`          | `false`                   | Enable OpenAPI Swagger UI. **Always `false` in production.**                     |
+| `SWAGGER_PATH`             | `docs`                    | Swagger endpoint path                                                            |
 
 ---
 
 ## 📜 Available NPM Scripts
 
-| Command | Description |
-| :--- | :--- |
-| `npm run start:dev` | Starts the NestJS development server with hot-reload |
-| `npm run build` | Compiles TypeScript into the `dist/` directory |
-| `npm run start:prod` | Runs the compiled production application |
-| `npm run db:generate` | Generates SQL migration files from Drizzle schemas |
-| `npm run db:migrate` | Applies pending migrations to PostgreSQL |
-| `npm run db:seed` | Populates database with mock users & posts via Faker.js |
-| `npm run db:studio` | Launches visual Drizzle Studio web manager |
-| `npm run db:push` | Directly synchronizes schema changes with database |
-| `npm run docker:up` | Starts local PostgreSQL 16 & Redis 7 Docker containers |
-| `npm run docker:down` | Stops and removes local Docker containers |
-| `npm run docker:logs` | Streams live logs from Docker containers |
-| `npm run lint` | Runs ESLint with automated fixes |
-| `npm run format` | Formats all files using Prettier |
-| `npm test` | Runs the Jest unit test suite |
-| `npm run test:e2e` | Runs End-to-End integration tests |
-| `npm run test:cov` | Generates test coverage report |
+| Command               | Description                                             |
+| :-------------------- | :------------------------------------------------------ |
+| `npm run start:dev`   | Starts the NestJS development server with hot-reload    |
+| `npm run build`       | Compiles TypeScript into the `dist/` directory          |
+| `npm run start:prod`  | Runs the compiled production application                |
+| `npm run db:generate` | Generates SQL migration files from Drizzle schemas      |
+| `npm run db:migrate`  | Applies pending migrations to PostgreSQL                |
+| `npm run db:seed`     | Populates database with mock users & posts via Faker.js |
+| `npm run db:studio`   | Launches visual Drizzle Studio web manager              |
+| `npm run db:push`     | Directly synchronizes schema changes with database      |
+| `npm run docker:up`   | Starts local PostgreSQL 16 & Redis 7 Docker containers  |
+| `npm run docker:down` | Stops and removes local Docker containers               |
+| `npm run docker:logs` | Streams live logs from Docker containers                |
+| `npm run lint`        | Runs ESLint with automated fixes                        |
+| `npm run format`      | Formats all files using Prettier                        |
+| `npm test`            | Runs the Jest unit test suite                           |
+| `npm run test:e2e`    | Runs End-to-End integration tests                       |
+| `npm run test:cov`    | Generates test coverage report                          |
 
 ---
 
@@ -874,3 +928,10 @@ npm run test:e2e
 Contributions are always welcome! Check out our [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+---
+
+<p align="center">
+  Built with ❤️ by the team at <a href="https://macromodule.com"><b>Macromodule</b></a>.<br>
+  <i>Empowering modern engineering teams with scalable, production-grade backend architecture.</i>
+</p>
